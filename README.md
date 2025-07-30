@@ -1,23 +1,120 @@
-# Quantum Quiz
+# BhramaQ - Quantum Computing Quiz
 
-A beautiful, interactive web application for learning quantum physics through engaging quizzes. Explore the fascinating world of quantum mechanics with three progressive difficulty levels.
+A static web application for learning quantum computing concepts through interactive quizzes.
 
 ## Features
 
-- **Three Difficulty Levels**: From basic quantum concepts to advanced applications
-- **Interactive Quiz Interface**: Modern, responsive design with real-time feedback
-- **Quantum-Themed Design**: Beautiful animations and particle effects
-- **Progress Tracking**: Visual progress bars and score tracking
-- **Responsive Design**: Works perfectly on desktop and mobile devices
+- **3 Progressive Levels**: Qubit Basics, Bloch Sphere, and Dirac Notation
+- **Interactive Quizzes**: 5 questions per level with up to 3 extra questions if needed
+- **Chocolate Reward System**: Earn chocolates for passing each level (4+ correct answers)
+- **Beautiful UI**: Quantum-themed design with particle animations
+- **Progress Tracking**: LocalStorage-based progress tracking across levels
+
+## Live Demo
+
+Visit the live application: [https://sheethal1010.github.io/BhramaQ/](https://sheethal1010.github.io/BhramaQ/)
+
+## Local Development
+
+To run locally for development:
+
+1. Clone the repository:
+```bash
+git clone https://github.com/sheethal1010/BhramaQ.git
+cd BhramaQ
+```
+
+2. Serve the files using Python's built-in server:
+```bash
+# Python 3
+python -m http.server 8000
+
+# Or Python 2
+python -m SimpleHTTPServer 8000
+```
+
+3. Open your browser and go to `http://localhost:8000`
+
+## Deployment to GitHub Pages
+
+This application is configured for automatic deployment to GitHub Pages:
+
+1. Push your changes to the `main` branch
+2. GitHub Actions will automatically deploy to `https://yourusername.github.io/BhramaQ/`
+3. Make sure GitHub Pages is enabled in your repository settings
+
+### Manual Deployment Steps
+
+If you need to deploy manually:
+
+1. Go to your repository on GitHub
+2. Navigate to Settings → Pages
+3. Select "Deploy from a branch" as the source
+4. Choose `main` branch and `/ (root)` folder
+5. Click Save
 
 ## Project Structure
 
 ```
-quantum_quiz/
-│
-├── app.py                 # Main Flask application
+BhramaQ/
+├── index.html          # Home page
+├── level.html          # Level selection page
+├── quiz.html           # Quiz page with embedded questions
+├── completed.html      # Results page
 ├── static/
-│   └── style.css         # Quantum-themed CSS styling
+│   └── style.css      # Styles and animations
+├── data/
+│   └── questions.json # Question database (for reference)
+├── .github/
+│   └── workflows/
+│       └── deploy.yml # GitHub Actions deployment
+└── README.md
+```
+
+## Learning Path
+
+### Level 1: Qubit Basics
+- Introduction to qubits and quantum states
+- Difference between classical and quantum bits
+- Basic quantum operations and measurements
+
+### Level 2: Bloch Sphere Representation
+- Geometric visualization of quantum states
+- Understanding coordinates and angles
+- Superposition states on the Bloch sphere
+
+### Level 3: Dirac (Bra-Ket) Notation
+- Mathematical notation for quantum states
+- Bra-ket operations and inner products
+- Expectation values and quantum measurements
+
+## Scoring System
+
+- **5 Initial Questions** per level
+- **Up to 3 Extra Questions** if you haven't reached 4 points after the first 5
+- **Passing Threshold**: 4 or more correct answers
+- **Chocolate Rewards**: 1 chocolate per level when you pass
+- **Live Scoring**: Immediate feedback with running score display
+
+## Technologies Used
+
+- Pure HTML5, CSS3, and JavaScript (no frameworks)
+- LocalStorage for progress tracking
+- CSS animations and particle effects
+- Responsive design for mobile and desktop
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes and test them locally
+4. Commit your changes: `git commit -m 'Add feature'`
+5. Push to the branch: `git push origin feature-name`
+6. Submit a pull request
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
 ├── templates/
 │   ├── index.html        # Landing page
 │   ├── level.html        # Level selection page

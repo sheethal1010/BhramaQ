@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Quiz</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <!-- Quantum Background Animation -->
+    <div class="quantum-bg" id="quantumBg"></div>
+    
+    <div class="container">
+        <div class="quiz-container">
+            <div class="question-header">
+                <div class="question-number">
+                    Question <span id="questionNumber">1</span> of <span id="totalQuestions">5</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 20%"></div>
+                </div>
+            </div>
+            
+            <!-- Simple Attempted/Score Display -->
+            <div style="text-align:center; margin-bottom: 20px; color: #00ffff; font-size: 1.1rem;">
+                Questions Attempted: <span id="attemptedCount">0</span>/<span id="totalQuestions2">5</span>
+                &nbsp;|&nbsp;
+                Score: <span id="currentScore">0</span>
+            </div>
+            
+            <div class="card">
+                <div class="question-text" id="questionText">
+                    Loading question...
+                </div>
+                
+                <div class="options-container" id="optionsContainer">
+                    <!-- Options will be loaded dynamically -->
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" id="submitBtn" onclick="submitAnswer()" disabled>
+                        Submit Answer
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Result message area -->
+            <div id="resultMessage" style="display: none; text-align: center; margin-top: 20px; padding: 15px; border-radius: 10px;"></div>
+        </div>
+    </div>
+    
+    <script>
+        let questions = {};
+        let selectedAnswer = null;
+        let isAnswered = false;
+        let currentScore = 0;
+        let attemptedCount = 0;
+        let currentQuestionIndex = 0;
+        let currentQuestions = [];
+        let allQuestions = [];
+        let levelId = 1;
+        let extraQuestionsUsed = 0;
+        
+        // Embed questions directly to avoid CORS issues
+        function loadQuestions() {
+            // Questions data embedded directly
+            questions = {
+  "level_1": [
+        {
+          "question": "What is a qubit?",
+          "options": ["A classical bit", "A data structure", "A quantum bit that can be 0, 1, or both", "An optical illusion"],
+          "correct_answer": "A quantum bit that can be 0, 1, or both"
+        },
+        {
+          "question": "What is the fundamental difference between a qubit and a classical bit?",
+          "options": ["Qubits can hold multiple values at once", "Qubits are larger", "Classical bits use light", "Qubits are slower"],
+          "correct_answer": "Qubits can hold multiple values at once"
+        },
+        {
+          "question": "What is superposition in quantum computing?",
+          "options": ["The ability to hold only one value", "The position of the bit in memory", "The ability to be in multiple states simultaneously", "None of the above"],
+          "correct_answer": "The ability to be in multiple states simultaneously"
+        },
+        {
+          "question": "How many classical bits are needed to represent a single qubit's state exactly?",
+          "options": ["1", "2", "Infinite", "None"],
+          "correct_answer": "Infinite"
+        },
+        {
+          "question": "Which of the following represents a valid qubit state?",
+          "options": ["Only 0", "Only 1", "A linear combination of 0 and 1", "Negative one"],
+          "correct_answer": "A linear combination of 0 and 1"
+        },
+        {
+          "question": "What is the measurement outcome of a qubit in superposition?",
+          "options": ["Both 0 and 1 at once", "Only 0", "Either 0 or 1 probabilistically", "None of the above"],
+          "correct_answer": "Either 0 or 1 probabilistically"
+        },
+        {
+          "question": "Which of the following gates is unique to quantum computing?",
+          "options": ["AND gate", "OR gate", "XOR gate", "Hadamard gate"],
+          "correct_answer": "Hadamard gate"
+        },
+        {
+          "question": "What does a quantum gate do?",
+          "options": ["Transfers data to memory", "Flips classical bits", "Manipulates qubit states", "Sends data to CPU"],
+          "correct_answer": "Manipulates qubit states"
+        },
+        {
+          "question": "What is the maximum number of distinguishable states for 1 qubit?",
+          "options": ["1", "2", "Infinite", "Depends on measurement"],
+          "correct_answer": "2"
+        },
+        {
+          "question": "What are the standard basis states for a qubit?",
+          "options": ["|A⟩ and |B⟩", "|0⟩ and |1⟩", "True and False", "Open and Close"],
+          "correct_answer": "|0⟩ and |1⟩"
+        }
+      ],
+  "level_2": [
+        {
+          "question": "What does the Bloch sphere represent?",
+          "options": ["Classical bit states", "Quantum superposition states", "Computer memory", "Network topology"],
+          "correct_answer": "Quantum superposition states"
+        },
+        {
+          "question": "On a Bloch sphere, where are the |0⟩ and |1⟩ states located?",
+          "options": ["North and South poles", "East and West poles", "On the equator", "At the center"],
+          "correct_answer": "North and South poles"
+        },
+        {
+          "question": "What do points on the Bloch sphere equator represent?",
+          "options": ["Pure |0⟩ or |1⟩ states", "Mixed states", "Equal superposition states", "Entangled states"],
+          "correct_answer": "Equal superposition states"
+        },
+        {
+          "question": "What is the significance of the angle θ (theta) in Bloch sphere coordinates?",
+          "options": ["It determines the phase", "It determines the probability amplitudes", "It has no significance", "It determines entanglement"],
+          "correct_answer": "It determines the probability amplitudes"
+        },
+        {
+          "question": "What is the significance of the angle φ (phi) in Bloch sphere coordinates?",
+          "options": ["It determines probability amplitudes", "It determines the phase", "It determines measurement outcome", "It has no significance"],
+          "correct_answer": "It determines the phase"
+        },
+        {
+          "question": "What state is represented at coordinates (θ=π/2, φ=0) on the Bloch sphere?",
+          "options": ["|0⟩", "|1⟩", "|+⟩ = (|0⟩ + |1⟩)/√2", "|-⟩ = (|0⟩ - |1⟩)/√2"],
+          "correct_answer": "|+⟩ = (|0⟩ + |1⟩)/√2"
+        },
+        {
+          "question": "What state is represented at coordinates (θ=π/2, φ=π) on the Bloch sphere?",
+          "options": ["|0⟩", "|1⟩", "|+⟩ = (|0⟩ + |1⟩)/√2", "|-⟩ = (|0⟩ - |1⟩)/√2"],
+          "correct_answer": "|-⟩ = (|0⟩ - |1⟩)/√2"
+        },
+        {
+          "question": "What happens to a qubit state when it moves around the Bloch sphere?",
+          "options": ["It changes measurement probabilities", "It becomes entangled", "It gets destroyed", "Nothing changes"],
+          "correct_answer": "It changes measurement probabilities"
+        },
+        {
+          "question": "Can mixed quantum states be represented on the Bloch sphere surface?",
+          "options": ["Yes, on the surface", "No, only inside the sphere", "Only at the poles", "Only on the equator"],
+          "correct_answer": "No, only inside the sphere"
+        },
+        {
+          "question": "What geometric transformation represents a quantum gate operation on the Bloch sphere?",
+          "options": ["Translation", "Scaling", "Rotation", "Reflection only"],
+          "correct_answer": "Rotation"
+        }
+      ],
+  "level_3": [
+        {
+          "question": "What does the notation |ψ⟩ represent in Dirac notation?",
+          "options": ["A classical state", "A ket (quantum state vector)", "A probability", "A measurement"],
+          "correct_answer": "A ket (quantum state vector)"
+        },
+        {
+          "question": "What does the notation ⟨φ| represent in Dirac notation?",
+          "options": ["A ket", "A bra (complex conjugate transpose)", "A measurement", "An operator"],
+          "correct_answer": "A bra (complex conjugate transpose)"
+        },
+        {
+          "question": "What does the inner product ⟨φ|ψ⟩ represent?",
+          "options": ["The probability amplitude", "The energy", "The momentum", "The position"],
+          "correct_answer": "The probability amplitude"
+        },
+        {
+          "question": "What is |⟨φ|ψ⟩|² in quantum mechanics?",
+          "options": ["The energy", "The transition probability", "The momentum", "The position"],
+          "correct_answer": "The transition probability"
+        },
+        {
+          "question": "What does the outer product |ψ⟩⟨φ| represent?",
+          "options": ["A scalar", "A vector", "An operator/matrix", "A probability"],
+          "correct_answer": "An operator/matrix"
+        },
+        {
+          "question": "How is the |+⟩ state written in terms of computational basis states?",
+          "options": ["|0⟩ + |1⟩", "(|0⟩ + |1⟩)/√2", "|0⟩ - |1⟩", "(|0⟩ - |1⟩)/√2"],
+          "correct_answer": "(|0⟩ + |1⟩)/√2"
+        },
+        {
+          "question": "How is the |-⟩ state written in terms of computational basis states?",
+          "options": ["|0⟩ + |1⟩", "(|0⟩ + |1⟩)/√2", "|0⟩ - |1⟩", "(|0⟩ - |1⟩)/√2"],
+          "correct_answer": "(|0⟩ - |1⟩)/√2"
+        },
+        {
+          "question": "What is the result of ⟨0|0⟩?",
+          "options": ["0", "1", "1/√2", "Undefined"],
+          "correct_answer": "1"
+        },
+        {
+          "question": "What is the result of ⟨0|1⟩?",
+          "options": ["0", "1", "1/√2", "Undefined"],
+          "correct_answer": "0"
+        },
+        {
+          "question": "What does the expectation value ⟨ψ|A|ψ⟩ represent?",
+          "options": ["The eigenvalue", "The average measurement result", "The probability", "The wavefunction"],
+          "correct_answer": "The average measurement result"
+        }
+      ]
+};
+            return questions;
+        }
+        
+        // Get level from URL parameter
+        function getLevelFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return parseInt(urlParams.get('level')) || 1;
+        }
+        
+        // Initialize quiz
+        function initQuiz() {
+            loadQuestions();
+            levelId = getLevelFromURL();
+            
+            const levelQuestions = questions[`level_${levelId}`] || [];
+            if (levelQuestions.length === 0) {
+                document.getElementById('questionText').textContent = 'No questions available for this level.';
+                return;
+            }
+            
+            // Shuffle and select up to 8 questions (5 main + 3 extra)
+            allQuestions = shuffleArray([...levelQuestions]).slice(0, Math.min(levelQuestions.length, 8));
+            currentQuestions = allQuestions.slice(0, 5);
+            
+            // Update title
+            document.title = `Quantum Quiz - Level ${levelId}`;
+            
+            // Display first question
+            displayCurrentQuestion();
+        }
+        
+        // Shuffle array function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Display current question
+        function displayCurrentQuestion() {
+            if (currentQuestionIndex >= currentQuestions.length) {
+                endQuiz();
+                return;
+            }
+            
+            const question = currentQuestions[currentQuestionIndex];
+            document.getElementById('questionText').textContent = question.question;
+            
+            // Clear and populate options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.dataset.answer = option;
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectOption(optionElement);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update progress
+            updateProgress();
+            
+            // Reset state
+            selectedAnswer = null;
+            isAnswered = false;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('resultMessage').style.display = 'none';
+        }
+        
+        // Update progress display
+        function updateProgress() {
+            const questionNumber = currentQuestionIndex + 1;
+            const totalQuestions = currentQuestions.length;
+            
+            document.getElementById('questionNumber').textContent = questionNumber;
+            document.getElementById('totalQuestions').textContent = totalQuestions;
+            document.getElementById('totalQuestions2').textContent = totalQuestions;
+            document.getElementById('attemptedCount').textContent = currentQuestionIndex; // Flask shows currentQuestionIndex not attemptedCount
+            document.getElementById('currentScore').textContent = currentScore;
+            
+            const progressPercentage = (questionNumber / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progressPercentage + '%';
+        }
+        
+        // Select option
+        function selectOption(element) {
+            if (isAnswered) return;
+            
+            // Remove previous selection
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Select new option
+            element.classList.add('selected');
+            selectedAnswer = element.dataset.answer;
+            document.getElementById('submitBtn').disabled = false;
+        }
+        
+        // Submit answer
+        function submitAnswer() {
+            if (!selectedAnswer || isAnswered) return;
+            
+            isAnswered = true;
+            attemptedCount++;
+            document.getElementById('submitBtn').disabled = true;
+            
+            const currentQuestion = currentQuestions[currentQuestionIndex];
+            const correctAnswer = currentQuestion.correct_answer;
+            const isCorrect = selectedAnswer === correctAnswer;
+            
+            if (isCorrect) {
+                currentScore++;
+            }
+            
+            // Show result
+            showResult(isCorrect, correctAnswer);
+            
+            // Move to next question after delay
+            setTimeout(() => {
+                currentQuestionIndex++;
+                
+                // Flask logic: If after 5 questions, score < 4 and extra questions remain, add up to 3 extra
+                if (currentQuestionIndex >= 5 && currentScore < 4 && extraQuestionsUsed < 3) {
+                    const nextExtraIndex = 5 + extraQuestionsUsed;
+                    if (nextExtraIndex < allQuestions.length) {
+                        currentQuestions.push(allQuestions[nextExtraIndex]);
+                        extraQuestionsUsed++;
+                    }
+                }
+                
+                // Quiz ends if:
+                // - User has 4 or more points (pass)
+                // - All possible questions (max 8) have been attempted
+                let quizDone = false;
+                if (currentScore >= 4) {
+                    quizDone = true;
+                } else if (currentQuestionIndex >= currentQuestions.length) {
+                    quizDone = true;
+                }
+                
+                if (quizDone) {
+                    endQuiz();
+                } else {
+                    displayCurrentQuestion();
+                }
+            }, 2000);
+        }
+        
+        // Show result of current answer
+        function showResult(isCorrect, correctAnswer) {
+            const resultDiv = document.getElementById('resultMessage');
+            resultDiv.style.display = 'block';
+            
+            if (isCorrect) {
+                resultDiv.innerHTML = '✅ Correct! +1 point';
+                resultDiv.style.background = 'rgba(0, 255, 0, 0.2)';
+                resultDiv.style.border = '1px solid rgba(0, 255, 0, 0.4)';
+                resultDiv.style.color = '#00ff00';
+            } else {
+                resultDiv.innerHTML = `❌ Incorrect. The correct answer is: ${correctAnswer}`;
+                resultDiv.style.background = 'rgba(255, 0, 0, 0.2)';
+                resultDiv.style.border = '1px solid rgba(255, 0, 0, 0.4)';
+                resultDiv.style.color = '#ff6b6b';
+            }
+            
+            // Highlight correct answer
+            document.querySelectorAll('.option').forEach(opt => {
+                if (opt.dataset.answer === correctAnswer) {
+                    opt.style.background = 'rgba(0, 255, 0, 0.3)';
+                    opt.style.border = '2px solid #00ff00';
+                } else if (opt.classList.contains('selected') && !isCorrect) {
+                    opt.style.background = 'rgba(255, 0, 0, 0.3)';
+                    opt.style.border = '2px solid #ff0000';
+                }
+            });
+            
+            // Update attempted count to match Flask behavior
+            document.getElementById('attemptedCount').textContent = currentQuestionIndex + 1;
+            document.getElementById('currentScore').textContent = currentScore;
+        }
+        
+        // End quiz and show results
+        function endQuiz() {
+            const totalQuestions = currentQuestionIndex; // Flask uses currentQuestionIndex as total
+            const finalScore = currentScore;
+            const percentage = totalQuestions > 0 ? Math.round((finalScore / totalQuestions) * 100) : 0;
+            const passed = finalScore >= 4; // Flask uses >= 4 as passing threshold
+            const chocolatesEarned = passed ? 1 : 0;
+            
+            // Save results to localStorage
+            const results = {
+                score: finalScore,
+                total: totalQuestions,
+                percentage: percentage,
+                chocolatesEarned: chocolatesEarned,
+                passed: passed,
+                levelId: levelId
+            };
+            
+            localStorage.setItem('quizResults', JSON.stringify(results));
+            
+            // Save level progress
+            if (passed) {
+                let levelsPassed = JSON.parse(localStorage.getItem('levelsPassed') || '[]');
+                if (!levelsPassed.includes(levelId)) {
+                    levelsPassed.push(levelId);
+                    localStorage.setItem('levelsPassed', JSON.stringify(levelsPassed));
+                }
+            }
+            
+            // Redirect to completed page
+            window.location.href = 'completed.html';
+        }
+        
+        // Create quantum particle animation
+        function createQuantumParticles() {
+            const quantumBg = document.getElementById('quantumBg');
+            const particleCount = 10;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                quantumBg.appendChild(particle);
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            createQuantumParticles();
+            initQuiz();
+        });
+    </script>
+</body>
+</html>
